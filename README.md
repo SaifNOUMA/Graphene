@@ -8,4 +8,4 @@ Graphene includes the following implementations:
 
 * [`Graphene_x86`](x86/): a portable implementation on commodity hardware tailored for x86 64-bit platforms. It uses OpenSSL and GMP to implement cryptoraphic primitives and finite-field operations, respectively.
 
-* [`Graphene_cortex_m4`](cortex_m4/): an implementation on 32-bit ARM mirconcontroller: ARM Cortex-M4. It uses WolfSSL to implement both cryptographic primitives and finite-filed operations. It portable to different ARM Cortex-M microcontrollers (with or not hardware accleration peripheral), by updating the configuration file accordingly.
+* [`Graphene_cortex_m4`](cortex-m4/): an implementation on 32-bit ARM mirconcontroller: ARM Cortex-M4. It uses WolfSSL to implement both cryptographic primitives and finite-filed operations. It portable to different ARM Cortex-M microcontrollers (with or not hardware accleration peripheral), by updating the configuration file accordingly.
