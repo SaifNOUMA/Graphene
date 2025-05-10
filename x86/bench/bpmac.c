@@ -4,8 +4,8 @@
 #include <openssl/rand.h>
 #include <openssl/hmac.h>
 #include <libtomcrypt/tomcrypt.h>
-#include "../umac/common.h"
 #include <gcrypt.h>
+#include "common.h"
 
 #if (IS_ZOUL==0) // Zoleratia z1
 #define SIZEOF_INT 2
@@ -51,11 +51,6 @@ void bpmac_init( char* key,  char* nonce_key, int max_size, bpmac_ctx_t* ctx){
 
     uint32_t i,j;
 
-    //ctx->bit_flips = (int*) malloc( 8*max_size*MAC_LEN );
-    //if (ctx->bit_flips == 0){
-    //	printf("Failed to allocate memory for bitflit MACs\n");
-    //}
-
     memset(ctx->res, 0, MAC_LEN);
     memset(ctx->default_msg, 0, MAC_LEN);
 
@@ -64,8 +59,6 @@ void bpmac_init( char* key,  char* nonce_key, int max_size, bpmac_ctx_t* ctx){
 
     memset(ctx->prev_nonce, 0, 16);
     memset(ctx->nonce_cache, 0, 16);
-
-    // dtls_hmac_context_t* hmac_ctx = dtls_hmac_new( (unsigned char*) key, 16 );
 
     ctx->max_len = max_size*8+1;
 
@@ -79,31 +72,12 @@ void bpmac_init( char* key,  char* nonce_key, int max_size, bpmac_ctx_t* ctx){
 
     for(i=0; i<max_size*8 +1; i++){
 
-        // dtls_hmac_init(hmac_ctx, ctx->mac_key, 16);
-
-    	// uint32_t input = 2*i;
-
-        // dtls_hmac_update(hmac_ctx, (unsigned char*)&input, 4);
-        // dtls_hmac_finalize(hmac_ctx, output0);
-
-
-        // dtls_hmac_init(hmac_ctx, ctx->mac_key, 16);
-
-
-        // input += 1;
-
-        // dtls_hmac_update(hmac_ctx, (unsigned char*)&input, 4);
-        // dtls_hmac_finalize(hmac_ctx, output1);
-
     	for(j=0; j<MAC_LEN_IN_INT; j++){
     	    ctx->default_msg[j] ^= ((int*)output0)[j];
 
     	    ctx->bit_flips[  i*MAC_LEN_IN_INT + j] = ((int*)output0)[j] ^ ((int*)output1)[j];
     	}
     }
-
-
-    // dtls_hmac_free(hmac_ctx);
 
 
 }

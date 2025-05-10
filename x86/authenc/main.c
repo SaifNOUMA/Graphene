@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     save_to_csv("cpu_time.csv", counter+1, 4, cpu_time);
     return 0;
 }
- 
+
 u32 tester(char *enc_algorithm, char *auth_algorithm, char *upd_algorithm, u32 inlen, u32 numiterations, u32 batch_size,
            double *enc_time, double *auth_time, double *agg_time, double *upd_time)
 {

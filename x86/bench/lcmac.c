@@ -1,7 +1,7 @@
 
-#include "../types.h"
-#include "../prf/rng_byte.h"
-#include "../umac/lc_umac.h"
+#include "rng.h"
+#include "rng_byte.h"
+#include "lc_umac.h"
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 
@@ -17,12 +17,8 @@ int main(int argc, char **argv)
     if (argc > 1) { bench_iterations = atoi(argv[1]); }
     if (argc > 2) { batch_size = atoi(argv[2]); }
 
-    // u32 prime_bits_set[] = {64, 128, 256};
     u32 prime_bits_set[] = {128};
-    // u32 prime_bits_set[] = {64, 72, 80, 88, 96, 104, 112, 120, 128};
-    // u32 datalens[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096};
-    u32 datalens[] = {16, 32, 64, 128, 256, 512, 1024};
-    // u32 datalens[] = {1};
+    u32 datalens[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096};
 
     for (u32 idx = 0; idx < sizeof(prime_bits_set)/sizeof(u32); idx++)
     {
@@ -64,6 +60,8 @@ int bench_umac_lc(u32 bench_iterations, u32 datalen, u32 prime_bits, double *cpu
     LC_UMAC_CTX umac_ctx;
     gmp_randstate_t state;
 
+    mpz_t tmp_mpz; // temporary variable for calculations
+
     gmp_randinit_default(state);
     mpz_init(umac_ctx.a);
     mpz_init(umac_ctx.b);
@@ -71,6 +69,7 @@ int bench_umac_lc(u32 bench_iterations, u32 datalen, u32 prime_bits, double *cpu
     mpz_init(umac_ctx.in_mpz);
     mpz_init(umac_ctx.out_mpz);
     mpz_init(umac_ctx.tmp_mpz);
+    mpz_init(tmp_mpz); // initialize the temporary variable
 
     umac_ctx.prime_bits = prime_bits;
     umac_ctx.prime_bytes = (prime_bits+7)/8;
@@ -79,6 +78,8 @@ int bench_umac_lc(u32 bench_iterations, u32 datalen, u32 prime_bits, double *cpu
     mpz_urandomb(umac_ctx.a, state, prime_bits);
     mpz_urandomb(umac_ctx.b, state, prime_bits);
     mpz_urandomb(umac_ctx.in_mpz, state, prime_bits);
+    mpz_urandomb(tmp_mpz, state, 3);
+    mpz_set_d(tmp_mpz, 65537); // initialize tmp_mpz to zero
     mpz_mod(umac_ctx.a, umac_ctx.a, umac_ctx.p);
     mpz_mod(umac_ctx.b, umac_ctx.b, umac_ctx.p);
     gmp_randclear(state);
@@ -106,10 +107,10 @@ int bench_umac_lc(u32 bench_iterations, u32 datalen, u32 prime_bits, double *cpu
         mpz_import(umac_ctx.in_mpz, _inlen, 1, 1, 0, 0, in+(blocks-1)*umac_ctx.prime_bytes);
 
         clock_gettime(CLOCK_MONOTONIC, &t0);
-        mpz_mul(umac_ctx.tmp_mpz, umac_ctx.a, umac_ctx.b);
-        // mpz_add(umac_ctx.out_mpz, umac_ctx.tmp_mpz, umac_ctx.a);
+        mpz_mul(umac_ctx.tmp_mpz, umac_ctx.in_mpz, umac_ctx.a);
+        mpz_add(umac_ctx.out_mpz, umac_ctx.tmp_mpz, umac_ctx.tmp_mpz);
 
-        // mpz_add(umac_ctx.out_mpz, umac_ctx.out_mpz, umac_ctx.b);
+        mpz_add(umac_ctx.out_mpz, umac_ctx.out_mpz, umac_ctx.b);
         mpz_mod(umac_ctx.out_mpz, umac_ctx.out_mpz, umac_ctx.p);
         clock_gettime(CLOCK_MONOTONIC, &t1);
         _cpu_time += (t1.tv_sec - t0.tv_sec) * 1e9 + (t1.tv_nsec - t0.tv_nsec);
@@ -118,7 +119,7 @@ int bench_umac_lc(u32 bench_iterations, u32 datalen, u32 prime_bits, double *cpu
         mpz_export(out, &_outlen, 1, 1, 0, 0, umac_ctx.out_mpz);
     }
 
-    printf("LC_UMAC(prime_bits=%3u, prime_bytes=%3u, inlen=%4u, padded_inlen=%4u, blocks=%4u) = %.0f ms\n", prime_bits, prime_bytes, datalen, padded_inlen, blocks, _cpu_time / bench_iterations);
+    printf("LC_UMAC(prime_bits=%3u, prime_bytes=%3u, inlen=%4u, padded_inlen=%4u, blocks=%4u) = %.0f ns\n", prime_bits, prime_bytes, datalen, padded_inlen, blocks, _cpu_time / bench_iterations);
     *cpu_time = _cpu_time / bench_iterations;
     
     free(in);
@@ -131,7 +132,6 @@ int bench_umac_lc(u32 bench_iterations, u32 datalen, u32 prime_bits, double *cpu
     mpz_clear(umac_ctx.tmp_mpz);
     return 0;
 }
-
 
 // implementation
 int bench_umac_lc_batch(u32 bench_iterations, u32 batch_size, u32 datalen, u32 prime_bits, double *cpu_time)
@@ -210,7 +210,7 @@ int bench_umac_lc_batch(u32 bench_iterations, u32 batch_size, u32 datalen, u32 p
         mpz_export(out, &_outlen, 1, 1, 0, 0, umac_ctx.out_mpz);
     }
 
-    printf("LC_UMAC_BATCH(prime_bits=%3u, prime_bytes=%3u, inlen=%4u, padded_inlen=%4u, blocks=%4u, batch_size=%4u) = %.0f ms\n", prime_bits, prime_bytes, datalen, padded_inlen, blocks, _cpu_time / bench_iterations, batch_size);
+    printf("LC_UMAC_BATCH(prime_bits=%3u, prime_bytes=%3u, inlen=%4u, padded_inlen=%4u, blocks=%4u, batch_size=%4u) = %.0f ms\n", prime_bits, prime_bytes, datalen, padded_inlen, blocks, batch_size, _cpu_time / bench_iterations);
     *cpu_time = _cpu_time / bench_iterations;
     
     free(in);

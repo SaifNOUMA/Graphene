@@ -1,10 +1,10 @@
 
-#include "../poly1305/poly1305aes/poly1305_53.h"
-#include "../umac/common.h"
-#include "../prf/rng_byte.h"
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <gcrypt.h>
+#include "../poly1305/poly1305aes/poly1305_53.h"
+#include "common.h"
+#include "rng_byte.h"
 
 static int bench_poly1305_ssl(u32 bench_iterations, u32 datalen, double *cpu_time);
 static int bench_poly1305_gcrypt(u32 bench_iterations, u32 datalen, double *cpu_time);

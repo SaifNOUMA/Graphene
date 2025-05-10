@@ -1,10 +1,9 @@
 
 #include <gcrypt.h>
-#include "../types.h"
 #include <openssl/evp.h>
 #include <openssl/rand.h>
-#include "../umac/common.h"
 #include <libtomcrypt/tomcrypt.h>
+#include "common.h"
 
 typedef struct {
     const char *name;
@@ -22,10 +21,13 @@ u32 openssl_aes_192_gcm_aad(u8 *key, u8 *iv, u8 *in, u32 inlen, u8 *out);
 u32 openssl_aes_192_gcm(u8 *key, u8 *iv, u8 *in, u32 inlen, u8 *out);
 u32 openssl_aes_256_gcm_aad(u8 *key, u8 *iv, u8 *in, u32 inlen, u8 *out);
 u32 openssl_aes_256_gcm(u8 *key, u8 *iv, u8 *in, u32 inlen, u8 *out);
+
 u32 gcrypt_aes_128_ctr(u8 *key, u8 *iv, u8 *in, u32 inlen, u8 *out);
 u32 gcrypt_aes_256_ctr(u8 *key, u8 *iv, u8 *in, u32 inlen, u8 *out);
+
 u32 libtomcrypt_aes_128_ctr(u8 *key, u8 *iv, u8 *in, u32 inlen, u8 *out);
 u32 libtomcrypt_aes_256_ctr(u8 *key, u8 *iv, u8 *in, u32 inlen, u8 *out);
+
 int bench_prf(test_encrypt_t test_encrypt, u8 *key, u8 *iv, u32 bench_iterations, u32 datalen, double *cpu_time);
 
 static test_encrypt_t test_encrypts[] = {
@@ -60,7 +62,6 @@ int main(int argc, char **argv)
 
     register_cipher(&aes_desc);
 
-    // u32 datalens[] = {16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768};
     u32 datalens[] = {16, 32, 64, 128, 256, 512, 1024, 2048, 4096};
 
     for (u32 i = 0; i < sizeof(datalens)/sizeof(u32); i++)
@@ -98,7 +99,7 @@ int bench_prf(test_encrypt_t test_encrypt, u8 *key, u8 *iv, u32 bench_iterations
         _cpu_time += (t1.tv_sec - t0.tv_sec) * 1e9 + (t1.tv_nsec - t0.tv_nsec);
     }
     *cpu_time = _cpu_time / bench_iterations;
-    printf("%s: %.0f ns\n", test_encrypt.name, _cpu_time / bench_iterations);
+    printf("%s [%4u bytes] %.0f ns\n", test_encrypt.name, datalen, _cpu_time / bench_iterations);
 
     return 0;
 }

@@ -1,6 +1,5 @@
 
-#include "../types.h"
-#include "../prf/rng_byte.h"
+#include "rng_byte.h"
 #include "../umac/lc_umac.h"
 #include <openssl/evp.h>
 #include <openssl/rand.h>
@@ -17,10 +16,7 @@ int main(int argc, char **argv)
     if (argc > 1) { bench_iterations = atoi(argv[1]); }
     if (argc > 2) { batch_size = atoi(argv[2]); }
 
-    // u32 prime_bits_set[] = {64, 128, 256};
     u32 prime_bits_set[] = {128};
-    // u32 prime_bits_set[] = {64, 72, 80, 88, 96, 104, 112, 120, 128};
-    // u32 datalens[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096};
     u32 datalens[] = {1};
 
     for (u32 idx = 0; idx < sizeof(prime_bits_set)/sizeof(u32); idx++)
@@ -28,7 +24,6 @@ int main(int argc, char **argv)
         cpu_time[idx][0] = prime_bits_set[idx];
         for (u32 i = 0; i < sizeof(datalens)/sizeof(u32); i++)
         {
-            // if (bench_umac_lc(bench_iterations, datalens[i], prime_bits_set[idx], &cpu_time[idx][i+1]) != 0) { return -1; }
             if (bench_umac_lc_batch(bench_iterations, batch_size, datalens[i], prime_bits_set[idx], &cpu_time[idx][i+1]) != 0) { return -1; }
         }
     }

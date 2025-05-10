@@ -1,10 +1,9 @@
 
-#include "../types.h"
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <gcrypt.h>
 #include <libtomcrypt/tomcrypt.h>
-#include "../umac/common.h"
+#include "common.h"
 
 typedef struct {
     u32 outlen;
@@ -14,10 +13,10 @@ typedef struct {
 
 u32 openssl_hash_sha_256(u8 *data, u32 datalen, u8 *out);
 u32 openssl_hash_sha_512(u8 *data, u32 datalen, u8 *out);
-u32 libtomcrypt_hash_sha_256(u8 *data, u32 datalen, u8 *out);
-u32 libtomcrypt_hash_sha_512(u8 *data, u32 datalen, u8 *out);
 u32 openssl_hash_blake2s_256(u8 *data, u32 datalen, u8 *out);
 u32 openssl_hash_blake2b_512(u8 *data, u32 datalen, u8 *out);
+u32 libtomcrypt_hash_sha_256(u8 *data, u32 datalen, u8 *out);
+u32 libtomcrypt_hash_sha_512(u8 *data, u32 datalen, u8 *out);
 u32 libtomcrypt_hash_blake2s_256(u8 *data, u32 datalen, u8 *out);
 u32 libtomcrypt_hash_blake2b_512(u8 *data, u32 datalen, u8 *out);
 u32 gcrypt_hash_sha_256(u8 *data, u32 datalen, u8 *out);
@@ -27,18 +26,18 @@ u32 gcrypt_hash_blake2b_512(u8 *data, u32 datalen, u8 *out);
 static int bench_hash(test_hash_t test_hash, u32 bench_iterations, u32 datalen, double *cpu_time);
 
 static test_hash_t test_hashes[] = {
-    {32, "libtomcrypt_hash_sha_256    ", libtomcrypt_hash_sha_256},
-    {64, "libtomcrypt_hash_sha_512    ", libtomcrypt_hash_sha_512},
-    {32, "libtomcrypt_hash_blake2s_256", libtomcrypt_hash_blake2s_256},
-    {64, "libtomcrypt_hash_blake2b_512", libtomcrypt_hash_blake2b_512},
+    // {32, "libtomcrypt_hash_sha_256    ", libtomcrypt_hash_sha_256},
+    // {64, "libtomcrypt_hash_sha_512    ", libtomcrypt_hash_sha_512},
+    // {32, "libtomcrypt_hash_blake2s_256", libtomcrypt_hash_blake2s_256},
+    // {64, "libtomcrypt_hash_blake2b_512", libtomcrypt_hash_blake2b_512},
     {32, "openssl_hash_sha_256        ", openssl_hash_sha_256},
     {64, "openssl_hash_sha_512        ", openssl_hash_sha_512},
     {32, "openssl_hash_blake2s_256    ", openssl_hash_blake2s_256},
     {64, "openssl_hash_blake2b_512    ", openssl_hash_blake2b_512},
-    {32, "gcrypt_hash_sha_256         ", gcrypt_hash_sha_256},
-    {64, "gcrypt_hash_sha_512         ", gcrypt_hash_sha_512},
-    {32, "gcrypt_hash_blake2s_256    ", gcrypt_hash_blake2s_256},
-    {64, "gcrypt_hash_blake2b_512    ", gcrypt_hash_blake2b_512},
+    // {32, "gcrypt_hash_sha_256         ", gcrypt_hash_sha_256},
+    // {64, "gcrypt_hash_sha_512         ", gcrypt_hash_sha_512},
+    // {32, "gcrypt_hash_blake2s_256    ", gcrypt_hash_blake2s_256},
+    // {64, "gcrypt_hash_blake2b_512    ", gcrypt_hash_blake2b_512},
 };
 
 int main(int argc, char **argv)

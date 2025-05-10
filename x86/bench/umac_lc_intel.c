@@ -1,6 +1,8 @@
 
-#include "../umac/common.h"
 #include <time.h>
+#include "common.h"
+#include <openssl/rand.h>
+
 #define bytelength 8
 #define bitlength 64
 

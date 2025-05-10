@@ -1,9 +1,6 @@
 
-#include "../types.h"
-#include <openssl/evp.h>
 #include <openssl/rand.h>
-#include <openssl/hmac.h>
-#include "../umac/common.h"
+#include "common.h"
 
 static int bench_xor(u32 bench_iterations, u32 datalen, u32 batch_size, double *cpu_time);
 

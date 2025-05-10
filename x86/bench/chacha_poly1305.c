@@ -1,9 +1,8 @@
 
-#include "../umac/common.h"
-#include "../prf/rng_byte.h"
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <gcrypt.h>
+#include "../umac/common.h"
 
 static int bench_chacha_poly1305_ssl(u32 bench_iterations, u32 datalen, double *cpu_time);
 

@@ -1,11 +1,10 @@
 
-#include "../types.h"
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/hmac.h>
-#include <libtomcrypt/tomcrypt.h>
-#include "../umac/common.h"
 #include <gcrypt.h>
+#include <libtomcrypt/tomcrypt.h>
+#include "common.h"
 
 typedef struct {
     u32 outlen;
@@ -106,9 +105,9 @@ static int bench_hmac(u32 bench_iterations, u32 datalen, test_hmac_t test_hmac, 
     }
 
     clock_gettime(CLOCK_MONOTONIC, &t1);
-    _cpu_time += (t1.tv_sec - t0.tv_sec) * 1e3 + (t1.tv_nsec - t0.tv_nsec) / 1e6;
+    _cpu_time += (t1.tv_sec - t0.tv_sec) * 1e9 + (t1.tv_nsec - t0.tv_nsec);
 
-    printf("HMAC(%11s,inlen=%4u) = %.6f ms\n", test_hmac.name, datalen, _cpu_time / bench_iterations);
+    printf("HMAC(%11s,inlen=%4u) = %.0f ns\n", test_hmac.name, datalen, _cpu_time / bench_iterations);
     *cpu_time = _cpu_time * 1e6 / bench_iterations;
 
     free(in);
@@ -177,8 +176,25 @@ u32 gcrypt_hmac_blake2b_512(u8 *key, u32 keylen, u8 *data, u32 datalen, u8 *out)
 u32 openssl_hmac_sha_256(u8 *key, u32 keylen, u8 *data, u32 datalen, u8 *out)
 {
     u32 outlen;
+    HMAC_CTX *ctx = HMAC_CTX_new();
+    if (ctx == NULL) { return -1; }
 
-    if (HMAC(EVP_sha256(), key, keylen, data, datalen, out, &outlen) == NULL) { return -1; }
+    if (HMAC_Init_ex(ctx, key, keylen, EVP_sha256(), NULL) != 1) {
+        HMAC_CTX_free(ctx);
+        return -1;
+    }
+
+    if (HMAC_Update(ctx, data, datalen) != 1) {
+        HMAC_CTX_free(ctx);
+        return -1;
+    }
+
+    if (HMAC_Final(ctx, out, &outlen) != 1) {
+        HMAC_CTX_free(ctx);
+        return -1;
+    }
+
+    HMAC_CTX_free(ctx);
 
     return 0;
 }
